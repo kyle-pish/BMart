@@ -97,15 +97,15 @@ def online_order(store_id, customer_id, order_items):
                 print(f"- BMart store {store_id} does not have enough of product {product} in stock")
 
                 # If product exists but store doesn't have enough inventory, check other BMarts in same state
-                cursor.execute("SELECT store.store_id, store.city, inventory.current_inventory FROM stores JOIN inventory ON store.store_id = inventory.store_id WHERE store.state = %s and inventory.product_UPC = %s AND inventory.current_inventory >= %s", (store['state'], product, order_items[product]))
+                cursor.execute("SELECT stores.store_id, stores.city, inventory.current_inventory FROM stores JOIN inventory ON stores.store_id = inventory.store_id WHERE stores.state = %s and inventory.product_UPC = %s AND inventory.current_inventory >= %s", (store['state'], product, order_items[product]))
                 other_stores = cursor.fetchall()
 
                 if other_stores:
                     print(f"Product {product} is avaliable at: ")
                     for store in other_stores:
                         print(f"- Store {store['store_id']} in {store['city']} (Quantity in stock: {other_stores['current_inventoy']})")
-                    else:
-                        print(f"We apologize, product {product} is not avaliable in any nearby store")
+                else:
+                    print(f"We apologize, product {product} is not avaliable in any nearby store")
             conn.rollback()
             return
         
@@ -122,7 +122,7 @@ def online_order(store_id, customer_id, order_items):
 if __name__ == '__main__':
 
     order_items = {
-        '123456789012': 2,
+        '836492571203': 2000,
         '987654321098': 1
     }
 
