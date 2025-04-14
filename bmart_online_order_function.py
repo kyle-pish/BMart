@@ -4,9 +4,10 @@ CS314 Spring 2025
 Kyle Pish
 '''
 
-from bmart_connection import connect_to_bmart_db
 import mysql.connector
 from mysql.connector import Error
+from bmart_connection import connect_to_bmart_db
+from decimal import Decimal
 
 
 def online_order(store_id, customer_id, order_items):
@@ -66,7 +67,7 @@ def online_order(store_id, customer_id, order_items):
         # Check that all products to order are valid and in stock
         invalid_inventory = []
         invalid_items = []
-        order_price = 0.0
+        order_price = Decimal('0.00')
 
         # Check over each item in the order_items to ensure they are valid products and in stock
         for product, quantity in order_items.items():
@@ -110,20 +111,47 @@ def online_order(store_id, customer_id, order_items):
             return
         
         # Place the order
+        cursor.execute("INSERT INTO orders (customer_id, order_datetime, in_person_order, online_order, completed, store_id) VALUES (%s, NOW(), FALSE, TRUE, FALSE, %s)", (customer_id, store_id))
+        order_id = cursor.lastrowid # Get the id of the order row we just inserted 
+
+        for product, quantity in order_items.items():
+            cursor.execute("INSERT INTO order_contents (order_id, product_ordered, quantity_ordered) VALUES (%s, %s, %s)", (order_id, product, quantity))
+            cursor.execute("UPDATE inventory SET current_inventory = current_inventory - %s WHERE product_UPC = %s AND store_id = %s", (quantity, product, store_id))
+        
+        conn.commit()
 
         # Output confirmation
+        print("Your order has been placed!")
+        print("----- Customer Info -----")
+        print(f"Name: {customer['customer_name']}")
+        print(f"Customer ID: {customer['customer_id']}")
+        print(f"Email: {customer['email']}")
+        print(f"Phone Number: {customer['phone_number']}")
+        print("----- Order Info -----")
+        print(f"Order_id: {order_id}")
+        print("Items Ordered")
+        for product, quantity in order_items.items():
+            cursor.execute("SELECT product_name FROM products WHERE product_UPC = %s", (product,))
+            product_name = cursor.fetchone()
+            print(f"- Product: {product_name['product_name']} (UPC - {product}) | Quantity: {quantity}")
+        print(f"Total Price of Order: ${order_price:.2f}")
+
+    except ValueError:
+        print(f"Value Error: {ValueError}")
+        conn.rollback()
+    except Error:
+        print(f"Database Error: {Error}")
+        conn.rollback
 
     finally:
         cursor.close()
         conn.close()
 
 
-
 if __name__ == '__main__':
 
     order_items = {
-        '836492571203': 2000,
-        '987654321098': 1
+        '104758392674': 1
     }
 
-    online_order(store_id=1, customer_id=1, order_items=order_items)
+    online_order(store_id=3, customer_id=1, order_items=order_items) # Brian Law ordering 1 Ribeye Steak from Chicago BMart
