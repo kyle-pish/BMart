@@ -16,7 +16,7 @@ def online_order(store_id, customer_id, order_items):
     online_orders will:
         Check that the input customer and store are valid
         Check the inventory of the store
-        If all items are avaliable, the order is placed and the store inventory is updated
+        If all items are avaliable/exist, the order is placed and the store inventory is updated
         If an item is not avaliable, the order is cancelled and check stores in the same state to see if they have the item
 
         Output results to console
@@ -29,7 +29,7 @@ def online_order(store_id, customer_id, order_items):
                 Output error details (invalid customer, invalid store, item not in inventory, etc.)
                 If store doesn't have an item that was ordered but another store in the same state does, output that stores info
 
-    Params:
+    Parameters:
         store_id (int): Unique identifier for a BMart store
         customer_id (int): Unique identifier for a unique customer
         order_items (dict[str, int]): Dictionary containing key, value pairs of product_UPC, item_quantity
@@ -54,7 +54,6 @@ def online_order(store_id, customer_id, order_items):
         # Check that the input customer is valid
         cursor.execute("SELECT * FROM customers WHERE customer_id = %s", (customer_id,))
         customer = cursor.fetchone()
-        #print(customer)
         if not customer:
             raise ValueError(f"The input customer does not exists: customer_id {customer_id}")
         
@@ -98,43 +97,59 @@ def online_order(store_id, customer_id, order_items):
                 print(f"- BMart store {store_id} does not have enough of product {product} in stock")
 
                 # If product exists but store doesn't have enough inventory, check other BMarts in same state
-                cursor.execute("SELECT stores.store_id, stores.city, inventory.current_inventory FROM stores JOIN inventory ON stores.store_id = inventory.store_id WHERE stores.state = %s and inventory.product_UPC = %s AND inventory.current_inventory >= %s", (store['state'], product, order_items[product]))
+                cursor.execute("SELECT stores.store_id, stores.city, inventory.current_inventory "
+                                "FROM stores "
+                                "JOIN inventory ON stores.store_id = inventory.store_id "
+                                "WHERE stores.state = %s and inventory.product_UPC = %s AND inventory.current_inventory >= %s", 
+                                (store['state'], product, order_items[product]))
                 other_stores = cursor.fetchall()
 
+                # If store is found with the product, output that store info to console
                 if other_stores:
                     print(f"Product {product} is avaliable at: ")
                     for store in other_stores:
-                        print(f"- Store {store['store_id']} in {store['city']} (Quantity in stock: {other_stores['current_inventoy']})")
-                else:
-                    print(f"We apologize, product {product} is not avaliable in any nearby store")
+                        print(f"- Store {store['store_id']} in {store['city']} (Quantity in stock: {store['current_inventory']})")
+
             conn.rollback()
             return
         
-        # Place the order
-        cursor.execute("INSERT INTO orders (customer_id, order_datetime, in_person_order, online_order, completed, store_id) VALUES (%s, NOW(), FALSE, TRUE, FALSE, %s)", (customer_id, store_id))
-        order_id = cursor.lastrowid # Get the id of the order row we just inserted 
+        # Place the order (inserting into orders table)
+        cursor.execute("INSERT INTO orders (customer_id, order_datetime, in_person_order, online_order, completed, store_id)"
+                        "VALUES (%s, NOW(), FALSE, TRUE, FALSE, %s)",
+                        (customer_id, store_id))
+        
+        # Get the id of the order row we just inserted: https://stackoverflow.com/questions/42533422/python-mysqldb-cursor-lastrowid
+        order_id = cursor.lastrowid
 
+        # Adding order info to the orders table and updated stores inventory to reflect the customers order
         for product, quantity in order_items.items():
             cursor.execute("INSERT INTO order_contents (order_id, product_ordered, quantity_ordered) VALUES (%s, %s, %s)", (order_id, product, quantity))
             cursor.execute("UPDATE inventory SET current_inventory = current_inventory - %s WHERE product_UPC = %s AND store_id = %s", (quantity, product, store_id))
         
         conn.commit()
 
-        # Output confirmation
+        # Output order confirmation info
         print("Your order has been placed!")
+
+        print("==== Order Confirmation ====")
         print("----- Customer Info -----")
         print(f"Name: {customer['customer_name']}")
         print(f"Customer ID: {customer['customer_id']}")
         print(f"Email: {customer['email']}")
         print(f"Phone Number: {customer['phone_number']}")
+
         print("----- Order Info -----")
         print(f"Order_id: {order_id}")
         print("Items Ordered")
+
         for product, quantity in order_items.items():
             cursor.execute("SELECT product_name FROM products WHERE product_UPC = %s", (product,))
             product_name = cursor.fetchone()
-            print(f"- Product: {product_name['product_name']} (UPC - {product}) | Quantity: {quantity}")
+            print(f"Product: {product_name['product_name']} (UPC - {product}) | Quantity: {quantity}")
         print(f"Total Price of Order: ${order_price:.2f}")
+
+        print("==== Thank You for Shopping at BMart ====")
+        print("\n")
 
     except ValueError:
         print(f"Value Error: {ValueError}")
@@ -150,8 +165,13 @@ def online_order(store_id, customer_id, order_items):
 
 if __name__ == '__main__':
 
-    order_items = {
-        '104758392674': 1
-    }
+    # Brian Law ordering 1 Ribeye Steak for the Chicago BMart
+    # Should succeed and display Order Confirmation details in console
+    order_items = {'104758392674': 1}
+    online_order(3, 1, order_items) # Brian Law ordering 1 Ribeye Steak from Chicago BMart
 
-    online_order(store_id=3, customer_id=1, order_items=order_items) # Brian Law ordering 1 Ribeye Steak from Chicago BMart
+    # Kyle Pish ordering Ground Beef from the Chicago BMart
+    # Chicago BMart doesn't have any in stock so console should inform customer
+    # that Ground Beef is in stock at the Bloomington BMart
+    order_items = {'987120345768': 1}
+    online_order(3, 2, order_items)
