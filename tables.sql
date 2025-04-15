@@ -19,7 +19,7 @@ DROP TABLE IF EXISTS store_hours;
 DROP TABLE IF EXISTS stores;
 DROP TABLE IF EXISTS customers;
 
-USE gjkt;
+USE final_proj_test;
 
 -- Table: customers
 CREATE TABLE customers (
@@ -136,6 +136,7 @@ CREATE TABLE reorder_requests (
     quantity_of_product TINYINT NOT NULL,
     order_date DATETIME NOT NULL,
     confirmed BOOLEAN NOT NULL, -- track if a vendor has confirmed they have seen the order
+    completed BOOlEAN NOT NULL, -- check if a reorder is still in progress or has been completed
     store_id INT NOT NULL,
     vendor_name VARCHAR(60) NOT NULL,
     shipment_id INT,
