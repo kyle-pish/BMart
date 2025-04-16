@@ -19,7 +19,7 @@ DROP TABLE IF EXISTS store_hours;
 DROP TABLE IF EXISTS stores;
 DROP TABLE IF EXISTS customers;
 
-USE final_proj_test;
+USE cs314;
 
 -- Table: customers
 CREATE TABLE customers (
