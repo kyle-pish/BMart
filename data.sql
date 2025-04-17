@@ -40,8 +40,7 @@ INSERT INTO stores (country, state, city, zip_postal_code, street, building_num,
 ('DEU', NULL, 'Berlin', '10115', 'Friedrichstrasse', '68', '49301234567'),
 ('JPN', NULL, 'Tokyo', '1500001', 'Main St', '1', '81356781234'),
 ('IRL', NULL, 'Dublin', 'D02XY45', 'O\'Connell St', '41', '35316781234'),
-('ESP', NULL, 'Madrid', '28004', 'Gran Via', '18884', '13633993636'),
-('USA', 'IL', 'Bloomington', '61701', 'Veterans Pkwy', '404', 3098675309);
+('ESP', NULL, 'Madrid', '28004', 'Gran Via', '18884', '13633993636');
 
 -- Insert Store Hours
 INSERT INTO store_hours (store_id, day_of_week, open_time, close_time) VALUES
@@ -139,15 +138,7 @@ INSERT INTO store_hours (store_id, day_of_week, open_time, close_time) VALUES
 (12, 'Thu', '07:00:00', '20:00:00'),
 (12, 'Fri', '07:00:00', '20:00:00'),
 (12, 'Sat', '08:00:00', '18:00:00'),
-(12, 'Sun', '10:00:00', '17:00:00'),
-
-(13, 'Mon', '07:00:00', '20:00:00'),
-(13, 'Tue', '07:00:00', '20:00:00'),
-(13, 'Wed', '07:00:00', '20:00:00'),
-(13, 'Thu', '07:00:00', '20:00:00'),
-(13, 'Fri', '07:00:00', '20:00:00'),
-(13, 'Sat', '08:00:00', '18:00:00'),
-(13, 'Sun', '10:00:00', '17:00:00');
+(12, 'Sun', '10:00:00', '17:00:00');
 
 -- Insert Vendors
 INSERT INTO vendors (vendor_name, brand_name) VALUES
@@ -324,6 +315,7 @@ INSERT INTO inventory (product_price, max_inventory, current_inventory, product_
 (10.75, 200, 155, '740182639507', 3),
 (10.50, 150, 95, '680193472561', 3),
 (18.00, 200, 120, '509274836120', 3),
+(10.50, 100, 31, '987120345768', 3),
 
 (3.50, 125, 88, '836492571203', 4),
 (23.00, 175, 119, '104758392674', 4),
@@ -548,9 +540,7 @@ INSERT INTO inventory (product_price, max_inventory, current_inventory, product_
 (10.00, 125, 67, '740182639507', 12),
 (10.00, 200, 193, '680193472561', 12),
 (16.75, 175, 100, '509274836120', 12),
-(10.00, 125, 50, '987120345768', 12),
-
-(10.50, 100, 31, '987120345768', 13);
+(10.00, 125, 50, '987120345768', 12);
 
 -- Insert Shipments
 INSERT INTO shipments (expected_delivery, received_delivery, expected_num_items, num_shipped_items, delivered, store_id, vendor_name) VALUES
@@ -674,6 +664,67 @@ INSERT INTO reorder_requests (quantity_of_product, order_date, confirmed, comple
 (40, '2025-04-10', TRUE, TRUE, 12, 'C&S Wholesale Grocers', 24, '839205764319'),
 (40, '2025-04-10', TRUE, TRUE, 12, 'C&S Wholesale Grocers', 24, '509274836120'),
 (20, '2025-04-10', TRUE, FALSE, 12, 'C&S Wholesale Grocers', 24, '823647195038');
+
+INSERT INTO reorders_in_shipments (reorder_id, shipment_id) VALUES
+(1, 1),
+(2, 1),
+(3, 2),
+(4, 2),
+(5, 3),
+(6, 3),
+(7, 3),
+(8, 4),
+(9, 4),
+(10, 4),
+(11,5),
+(12, 5),
+(13, 6),
+(14, 6),
+(15, 7),
+(16, 7),
+(17, 7),
+(18, 8),
+(19, 8),
+(20, 9),
+(21, 9),
+(22, 10),
+(23, 10),
+(24, 10),
+(25, 11),
+(26, 11),
+(27, 11),
+(28, 12),
+(29, 12),
+(30, 13),
+(31, 13),
+(32, 14),
+(33, 14),
+(34, 15),
+(35, 15),
+(36, 15),
+(37, 16),
+(38, 16),
+(39, 16),
+(40, 17),
+(41, 17),
+(42, 17),
+(43, 18),
+(44, 18),
+(45, 18),
+(46, 19),
+(47, 19),
+(48, 20),
+(49, 20),
+(50, 21),
+(51, 21),
+(52, 21),
+(53, 22),
+(54, 22),
+(55, 23),
+(56, 23),
+(57, 24),
+(58, 24),
+(59, 24);
 
 -- Insert Orders
 INSERT INTO orders (customer_id, order_datetime, in_person_order, online_order, completed, store_id) VALUES
