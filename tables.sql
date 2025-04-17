@@ -8,6 +8,7 @@ BMart Schema
 
 DROP TABLE IF EXISTS order_contents;
 DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS reorders_in_shipments;
 DROP TABLE IF EXISTS reorder_requests;
 DROP TABLE IF EXISTS shipments;
 DROP TABLE IF EXISTS inventory;
@@ -52,8 +53,8 @@ CREATE TABLE stores (
 );
 
 CREATE TABLE store_hours (
-	store_id INT,
-	day_of_week CHAR(3),
+    store_id INT,
+    day_of_week CHAR(3),
     open_time TIME,
     close_time TIME,
     PRIMARY KEY (store_id, day_of_week),
@@ -125,9 +126,9 @@ CREATE TABLE shipments (
     
     -- CONSTRAINT CHECK
     CONSTRAINT chk_received_matches_delivered CHECK (
-		(received_delivery IS NOT NULL AND delivered = TRUE) OR -- If there is a date for received_delivery then delivered = TRUE
-		(received_delivery IS NULL AND delivered = FALSE) -- If there is no date for received_delivery then delivered = FALSE
-	)
+       (received_delivery IS NOT NULL AND delivered = TRUE) OR -- If there is a date for received_delivery then delivered = TRUE
+       (received_delivery IS NULL AND delivered = FALSE) -- If there is no date for received_delivery then delivered = FALSE
+    )
 );
 
 -- Table: reorder_requests
@@ -136,7 +137,7 @@ CREATE TABLE reorder_requests (
     quantity_of_product TINYINT NOT NULL,
     order_date DATETIME NOT NULL,
     confirmed BOOLEAN NOT NULL, -- track if a vendor has confirmed they have seen the order
-    completed BOOlEAN NOT NULL, -- check if a reorder is still in progress or has been completed
+    completed BOOLEAN NOT NULL, -- check if a reorder is still in progress or has been completed
     store_id INT NOT NULL,
     vendor_name VARCHAR(60) NOT NULL,
     shipment_id INT,
@@ -148,6 +149,14 @@ CREATE TABLE reorder_requests (
     
     -- CHECK CONSTRAINT
     CONSTRAINT CHK_quantity CHECK (quantity_of_product > 0) -- Make sure each reorder contains some products (can't reorder 0 products)
+);
+
+CREATE TABLE reorders_in_shipments (
+    reorder_id INT,
+    shipment_id INT,
+    PRIMARY KEY (reorder_id, shipment_id),
+    FOREIGN KEY (reorder_id) REFERENCES reorder_requests(reorder_id),
+    FOREIGN KEY (shipment_id) REFERENCES  shipments(shipment_id)
 );
 
 -- Table: orders
