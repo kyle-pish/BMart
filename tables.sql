@@ -140,11 +140,9 @@ CREATE TABLE reorder_requests (
     completed BOOLEAN NOT NULL, -- check if a reorder is still in progress or has been completed
     store_id INT NOT NULL,
     vendor_name VARCHAR(60) NOT NULL,
-    shipment_id INT,
     product_ordered CHAR(12) NOT NULL,
     FOREIGN KEY (store_id) REFERENCES stores(store_id),
     FOREIGN KEY (vendor_name) REFERENCES vendors(vendor_name),
-    FOREIGN KEY (shipment_id) REFERENCES shipments(shipment_id),
     FOREIGN KEY (product_ordered) REFERENCES products(product_UPC),
     
     -- CHECK CONSTRAINT
