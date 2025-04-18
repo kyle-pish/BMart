@@ -102,6 +102,7 @@ def online_order(store_id, customer_id, order_items):
                                 "JOIN inventory ON stores.store_id = inventory.store_id "
                                 "WHERE stores.state = %s and inventory.product_UPC = %s AND inventory.current_inventory >= %s", 
                                 (store['state'], product, order_items[product]))
+                
                 other_stores = cursor.fetchall()
 
                 # If store is found with the product, output that store info to console
@@ -151,19 +152,27 @@ def online_order(store_id, customer_id, order_items):
         print("==== Thank You for Shopping at BMart ====")
         print("\n")
 
-    except ValueError:
-        print(f"Value Error: {ValueError}")
+    # If an error was encountered, output the appropriate error message to the console
+    except ValueError as ValErr:
+        print(f"Value Error: {ValErr}")
         conn.rollback()
-    except Error:
-        print(f"Database Error: {Error}")
+
+    except Error as Err:
+        print(f"Database Error: {Err}")
         conn.rollback
 
+    # Once everything is completed, close the cursor and connection to the database
     finally:
         cursor.close()
         conn.close()
 
 
 if __name__ == '__main__':
+
+    # Below are some simple tests I wrote to check all aspects of the function work properly
+    # There are comments with each test giving the expected output and explaination
+    # Note that the results are subject to change based in the state of the database
+    # All expected outputs are in terms of a fresh BMart database after running tables.sql and data.sql
 
     # Brian Law ordering 1 Ribeye Steak for the Chicago BMart
     # Should succeed and display Order Confirmation details in console
@@ -175,3 +184,15 @@ if __name__ == '__main__':
     # that Ground Beef is in stock at the Bloomington BMart
     order_items = {'987120345768': 1}
     online_order(3, 2, order_items)
+
+    # Error message should be output stating that the input store is invalid/doesn't exists
+    order_items = {'987120345768': 1}
+    online_order(1000000, 16, order_items)
+
+    # Error message should be output stating that the input customer is invalid/doesn't exists
+    order_items = {'987120345768': 1}
+    online_order(6, 1000000, order_items)
+
+    # Error message should be output stating that the input product is not sold by any BMart (invalid product UPC)
+    order_items = {'000000000000': 1}
+    online_order(7, 10, order_items)
