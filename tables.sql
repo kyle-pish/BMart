@@ -8,7 +8,7 @@ BMart Schema
 
 DROP TABLE IF EXISTS order_contents;
 DROP TABLE IF EXISTS orders;
-DROP TABLE IF EXISTS reorders_in_shipments
+DROP TABLE IF EXISTS reorders_in_shipments;
 DROP TABLE IF EXISTS reorder_requests;
 DROP TABLE IF EXISTS shipments;
 DROP TABLE IF EXISTS inventory;
