@@ -53,8 +53,8 @@ CREATE TABLE stores (
 );
 
 CREATE TABLE store_hours (
-	store_id INT,
-	day_of_week CHAR(3),
+    store_id INT,
+    day_of_week CHAR(3),
     open_time TIME,
     close_time TIME,
     PRIMARY KEY (store_id, day_of_week),
@@ -126,9 +126,9 @@ CREATE TABLE shipments (
     
     -- CONSTRAINT CHECK
     CONSTRAINT chk_received_matches_delivered CHECK (
-		(received_delivery IS NOT NULL AND delivered = TRUE) OR -- If there is a date for received_delivery then delivered = TRUE
-		(received_delivery IS NULL AND delivered = FALSE) -- If there is no date for received_delivery then delivered = FALSE
-	)
+       (received_delivery IS NOT NULL AND delivered = TRUE) OR -- If there is a date for received_delivery then delivered = TRUE
+       (received_delivery IS NULL AND delivered = FALSE) -- If there is no date for received_delivery then delivered = FALSE
+    )
 );
 
 -- Table: reorder_requests
@@ -140,7 +140,6 @@ CREATE TABLE reorder_requests (
     completed BOOLEAN NOT NULL, -- check if a reorder is still in progress or has been completed
     store_id INT NOT NULL,
     vendor_name VARCHAR(60) NOT NULL,
-    shipment_id INT,
     product_ordered CHAR(12) NOT NULL,
     FOREIGN KEY (store_id) REFERENCES stores(store_id),
     FOREIGN KEY (vendor_name) REFERENCES vendors(vendor_name),
