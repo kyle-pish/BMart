@@ -8,6 +8,7 @@ BMart Schema
 
 DROP TABLE IF EXISTS order_contents;
 DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS reorders_in_shipments
 DROP TABLE IF EXISTS reorder_requests;
 DROP TABLE IF EXISTS shipments;
 DROP TABLE IF EXISTS inventory;
@@ -136,18 +137,25 @@ CREATE TABLE reorder_requests (
     quantity_of_product TINYINT NOT NULL,
     order_date DATETIME NOT NULL,
     confirmed BOOLEAN NOT NULL, -- track if a vendor has confirmed they have seen the order
-    completed BOOlEAN NOT NULL, -- check if a reorder is still in progress or has been completed
+    completed BOOLEAN NOT NULL, -- check if a reorder is still in progress or has been completed
     store_id INT NOT NULL,
     vendor_name VARCHAR(60) NOT NULL,
     shipment_id INT,
     product_ordered CHAR(12) NOT NULL,
     FOREIGN KEY (store_id) REFERENCES stores(store_id),
     FOREIGN KEY (vendor_name) REFERENCES vendors(vendor_name),
-    FOREIGN KEY (shipment_id) REFERENCES shipments(shipment_id),
     FOREIGN KEY (product_ordered) REFERENCES products(product_UPC),
     
     -- CHECK CONSTRAINT
     CONSTRAINT CHK_quantity CHECK (quantity_of_product > 0) -- Make sure each reorder contains some products (can't reorder 0 products)
+);
+
+CREATE TABLE reorders_in_shipments (
+    reorder_id INT,
+    shipment_id INT,
+    PRIMARY KEY (reorder_id, shipment_id),
+    FOREIGN KEY (reorder_id) REFERENCES reorder_requests(reorder_id),
+    FOREIGN KEY (shipment_id) REFERENCES  shipments(shipment_id)
 );
 
 -- Table: orders
