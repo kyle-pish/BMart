@@ -50,7 +50,7 @@ def vendor_shipment(store : int, delivery_date : str, reorders : list[int], ship
             raise ValueError(f"The input store does not exist: {store}")
 
         # vendor exists check
-        cursor.execute("SELECT * FROM vendors WHERE vendor_name = %s", (vendor_name,))
+        cursor.execute("SELECT * FROM vendors WHERE vendor_name = %s LIMIT 1", (vendor_name,))
         vendor_check = cursor.fetchone()
         if not vendor_check:
             raise ValueError(f"The input vendor does not exist: {vendor_name}")
@@ -59,10 +59,10 @@ def vendor_shipment(store : int, delivery_date : str, reorders : list[int], ship
         expected_item_count = 0
         items_expected = []
         for reorder in reorders:
-            cursor.execute("SELECT reorder_requests.store_id, reorder_requests.quantity_of_product, reorder_requests.product_ordered, reorder_requests.vendor_name, reorders_in_shipments.shipment_id "
+            cursor.execute("SELECT reorder_requests.store_id, reorder_requests.quantity_of_product, reorder_requests.product_ordered, reorder_requests.vendor_name, reorders_in_shipments.shipment_id, reorder_requests.completed "
                            "FROM reorder_requests "
                            "LEFT JOIN reorders_in_shipments ON reorder_requests.reorder_id = reorders_in_shipments.reorder_id "
-                           "WHERE reorder_requests.reorder_id = %s",
+                           "WHERE reorder_requests.reorder_id = %s ",
                            (reorder,))
             reorder_valid = cursor.fetchone()
 
@@ -73,6 +73,8 @@ def vendor_shipment(store : int, delivery_date : str, reorders : list[int], ship
                 raise ValueError(f"One of the reorder numbers does not match the store id given: Reorder {reorder}")
             elif vendor_name != reorder_valid['vendor_name']:
                 raise ValueError(f"One of the reorder numbers does not match the vendor name given: Reorder {reorder}")
+            elif reorder_valid['completed']:
+                raise ValueError(f"One of the reorder numbers is already completed: Reorder {reorder}")
             elif reorder_valid['shipment_id'] is not None:
                 raise ValueError(f"One of the reorder is already in a shipment: Reorder {reorder}")
 
@@ -101,12 +103,9 @@ def vendor_shipment(store : int, delivery_date : str, reorders : list[int], ship
         for reorder in reorders:
             cursor.execute("INSERT INTO reorders_in_shipments VALUES(%s, %s)",
                            (reorder, new_ship_id,))
-
-        # Update confirmation if not confirmed
-        for reorder in reorders:
-            cursor.execute("UPDATE reorder_requests SET confirmed = 1 WHERE reorder_id = %s", (reorder,))
-
-        conn.commit()
+            # Update confirmation if not confirmed
+            cursor.execute("UPDATE reorder_requests SET confirmed = 1 WHERE reorder_id = %s",
+                           (reorder,))
 
         # Print manifest
         print(f"New Shipment Processed, Shipment_no: {new_ship_id}")
@@ -144,6 +143,7 @@ def vendor_shipment(store : int, delivery_date : str, reorders : list[int], ship
         bmart_outstanding = cursor.fetchone()
         print(f"Outstanding Reorders Requests to Bmart: {bmart_outstanding["count(reorder_requests.vendor_name)"]}")
         print()
+        conn.commit()
 
     # Whenever there is an error, print error and rollback
     except ValueError as valerr:
