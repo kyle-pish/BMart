@@ -40,7 +40,8 @@ INSERT INTO stores (country, state, city, zip_postal_code, street, building_num,
 ('DEU', NULL, 'Berlin', '10115', 'Friedrichstrasse', '68', '49301234567'),
 ('JPN', NULL, 'Tokyo', '1500001', 'Main St', '1', '81356781234'),
 ('IRL', NULL, 'Dublin', 'D02XY45', 'O\'Connell St', '41', '35316781234'),
-('ESP', NULL, 'Madrid', '28004', 'Gran Via', '18884', '13633993636');
+('ESP', NULL, 'Madrid', '28004', 'Gran Via', '18884', '13633993636'),
+('USA', 'IL', 'Bloomington', '61701', 'Main', '404', '3095430101');
 
 -- Insert Store Hours
 INSERT INTO store_hours (store_id, day_of_week, open_time, close_time) VALUES
@@ -540,7 +541,10 @@ INSERT INTO inventory (product_price, max_inventory, current_inventory, product_
 (10.00, 125, 67, '740182639507', 12),
 (10.00, 200, 193, '680193472561', 12),
 (16.75, 175, 100, '509274836120', 12),
-(10.00, 125, 50, '987120345768', 12);
+(10.00, 125, 50, '987120345768', 12),
+
+('10.25', 150, 75, '987120345768', 13);
+
 
 -- Insert Shipments
 INSERT INTO shipments (expected_delivery, received_delivery, expected_num_items, num_shipped_items, delivered, store_id, vendor_name) VALUES
