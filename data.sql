@@ -594,88 +594,88 @@ INSERT INTO shipments (expected_delivery, received_delivery, expected_num_items,
 
 -- Insert Reorder Requests
 INSERT INTO reorder_requests (quantity_of_product, order_date, confirmed, completed, store_id, vendor_name, product_ordered) VALUES
-(100, '2025-04-12', TRUE, FALSE, 1, 'C&S Wholesale Grocers', '823647195038'),
-(100, '2025-04-12', TRUE, TRUE, 1, 'C&S Wholesale Grocers', '810237465920'),
+(100, '2025-04-12', FALSE, FALSE, 1, 'McLane Company', '823647195038'),
+(100, '2025-04-12', TRUE, TRUE, 1, 'Sysco', '810237465920'),
 
-(50, '2025-04-09', TRUE, TRUE, 1, 'KeHE Distributors', '710492385612'),
-(50, '2025-04-09', TRUE, TRUE, 1, 'KeHE Distributors', '680193472561'),
+(50, '2025-04-09', TRUE, TRUE, 1, 'US Foods', '710492385612'),
+(50, '2025-04-09', TRUE, TRUE, 1, 'C&S Wholesale Grocers', '680193472561'),
 
-(50, '2025-04-11', TRUE, TRUE, 2, 'C&S Wholesale Grocers', '158372946021'),
-(75, '2025-04-11', TRUE, TRUE, 2, 'C&S Wholesale Grocers', '274918305672'),
-(50, '2025-04-11', TRUE, FALSE, 2, 'C&S Wholesale Grocers', '659382047193'),
+(50, '2025-04-11', FALSE, FALSE, 2, 'Sysco', '158372946021'),
+(75, '2025-04-11', TRUE, TRUE, 2, 'Sysco', '274918305672'),
+(50, '2025-04-11', FALSE, FALSE, 2, 'US Foods', '659382047193'),
 
-(50, '2025-04-14', TRUE, TRUE, 2, 'McLane Company', '371028495617'),
-(50, '2025-04-14', TRUE, TRUE, 2, 'McLane Company', '963184275091'),
-(50, '2025-04-14', TRUE, FALSE, 2, 'McLane Company', '158372946021'),
+(50, '2025-04-14', FALSE, FALSE, 2, 'Sysco', '371028495617'),
+(50, '2025-04-14', TRUE, TRUE, 2, 'US Foods', '963184275091'),
+(50, '2025-04-14', FALSE, FALSE, 2, 'Sysco', '158372946021'),
 
-(50, '2025-04-11', TRUE, TRUE, 3, 'US Foods', '987120345768'),
+(50, '2025-04-11', TRUE, TRUE, 3, 'C&S Wholesale Grocers', '987120345768'),
 (50, '2025-04-11', TRUE, TRUE, 3, 'US Foods', '204839176502'),
 
-(75, '2025-04-15', TRUE, TRUE, 3, 'KeHE Distributors', '371028495617'),
-(75, '2025-04-15', TRUE, TRUE, 3, 'KeHE Distributors', '509274836120'),
+(75, '2025-04-15', FALSE, FALSE, 3, 'Sysco', '371028495617'),
+(75, '2025-04-15', TRUE, TRUE, 3, 'C&S Wholesale Grocers', '509274836120'),
 
-(25, '2025-04-17', TRUE, TRUE, 4, 'McLane Company', '836492571203'),
-(25, '2025-04-17', TRUE, TRUE, 4, 'McLane Company', '427390185623'),
-(50, '2025-04-17', TRUE, FALSE, 4, 'McLane Company', '823647195038'),
+(25, '2025-04-17', TRUE, TRUE, 4, 'KeHE Distributors', '836492571203'),
+(25, '2025-04-17', FALSE, FALSE, 4, 'Sysco', '427390185623'),
+(50, '2025-04-17', FALSE, FALSE, 4, 'McLane Company', '823647195038'),
 
-(50, '2025-04-12', TRUE, TRUE, 4, 'McLane Company', '427390185623'),
+(50, '2025-04-12', TRUE, TRUE, 4, 'Sysco', '427390185623'),
 (50, '2025-04-12', TRUE, TRUE, 4, 'McLane Company', '823647195038'),
 
-(75, '2025-04-16', TRUE, TRUE, 5, 'US Foods', '690583142709'),
-(50, '2025-04-16', TRUE, FALSE, 5, 'US Foods', '104758392674'),
+(75, '2025-04-16', TRUE, TRUE, 5, 'Sysco', '690583142709'),
+(50, '2025-04-16', FALSE, FALSE, 5, 'KeHE Distributors', '104758392674'),
 
-(50, '2025-04-13', TRUE, TRUE, 5, 'Sysco', '836492571203'),
+(50, '2025-04-13', FALSE, FALSE, 5, 'KeHE Distributors', '836492571203'),
 (50, '2025-04-13', TRUE, TRUE, 5, 'Sysco', '839205764319'),
-(50, '2025-04-13', TRUE, FALSE, 5, 'Sysco', '987120345768'),
+(50, '2025-04-13', FALSE, FALSE, 5, 'C&S Wholesale Grocers', '987120345768'),
 
-(75, '2025-04-13', TRUE, TRUE, 6, 'McLane Company', '427390185623'),
-(75, '2025-04-13', TRUE, TRUE, 6, 'McLane Company', '740182639507'),
-(50, '2025-04-13', TRUE, TRUE, 6, 'McLane Company', '204839176502'),
+(75, '2025-04-13', TRUE, TRUE, 6, 'Sysco', '427390185623'),
+(75, '2025-04-13', FALSE, FALSE, 6, 'C&S Wholesale Grocers', '740182639507'),
+(50, '2025-04-13', TRUE, TRUE, 6, 'US Foods', '204839176502'),
 
 (100, '2025-04-10', TRUE, TRUE, 6, 'Sysco', '371028495617'),
-(100, '2025-04-10', TRUE, FALSE, 6, 'Sysco', '158372946021'),
+(100, '2025-04-10', TRUE, TRUE, 6, 'Sysco', '158372946021'),
 
-(75, '2025-04-15', TRUE, TRUE, 7, 'KeHE Distributors', '594730182647'),
-(50, '2025-04-15', TRUE, FALSE, 7, 'KeHE Distributors', '659382047193'),
+(75, '2025-04-15', TRUE, TRUE, 7, 'McLane Company', '594730182647'),
+(50, '2025-04-15', FALSE, FALSE, 7, 'US Foods', '659382047193'),
 
-(50, '2025-04-14', TRUE, TRUE, 7, 'McLane Company', '274918305672'),
-(50, '2025-04-14', TRUE, TRUE, 7, 'McLane Company', '274918305672'),
+(50, '2025-04-14', TRUE, TRUE, 7, 'Sysco', '274918305672'),
+(50, '2025-04-14', TRUE, TRUE, 7, 'Sysco', '274918305672'),
 
-(40, '2025-04-16', TRUE, TRUE, 8, 'C&S Wholesale Grocers', '740182639507'),
-(40, '2025-04-16', TRUE, TRUE, 8, 'C&S Wholesale Grocers', '182640593827'),
-(20, '2025-04-16', TRUE, FALSE, 8, 'C&S Wholesale Grocers', '836492571203'),
+(40, '2025-04-16', FALSE, FALSE, 8, 'C&S Wholesale Grocers', '740182639507'),
+(40, '2025-04-16', TRUE, TRUE, 8, 'US Foods', '182640593827'),
+(20, '2025-04-16', FALSE, FALSE, 8, 'KeHE Distributors', '836492571203'),
 
-(50, '2025-04-12', TRUE, TRUE, 8, 'KeHE Distributors', '710492385612'),
-(50, '2025-04-12', TRUE, TRUE, 8, 'KeHE Distributors', '710492385612'),
-(25, '2025-04-12', TRUE, TRUE, 8, 'KeHE Distributors', '659382047193'),
+(50, '2025-04-12', TRUE, TRUE, 8, 'US Foods', '710492385612'),
+(50, '2025-04-12', TRUE, TRUE, 8, 'US Foods', '710492385612'),
+(25, '2025-04-12', FALSE, FALSE, 8, 'US Foods', '659382047193'),
 
-(40, '2025-04-14', TRUE, TRUE, 9, 'US Foods', '836492571203'),
-(30, '2025-04-14', TRUE, FALSE, 9, 'US Foods', '158372946021'),
-(30, '2025-04-14', TRUE, TRUE, 9, 'US Foods', '823647195038'),
+(40, '2025-04-14', TRUE, TRUE, 9, 'KeHE Distributors', '836492571203'),
+(30, '2025-04-14', FALSE, FALSE, 9, 'Sysco', '158372946021'),
+(30, '2025-04-14', TRUE, TRUE, 9, 'McLane Company', '823647195038'),
 
 (30, '2025-04-17', TRUE, TRUE, 9, 'Sysco', '371028495617'),
-(30, '2025-04-17', TRUE, FALSE, 9, 'Sysco', '398176254091'),
-(40, '2025-04-17', TRUE, TRUE, 9, 'Sysco', '509274836120'),
+(30, '2025-04-17', FALSE, FALSE, 9, 'KeHE Distributors', '398176254091'),
+(40, '2025-04-17', TRUE, TRUE, 9, 'C&S Wholesale Grocers', '509274836120'),
 
 (75, '2025-04-11', TRUE, TRUE, 10, 'US Foods', '710492385612'),
-(75, '2025-04-11', TRUE, TRUE, 10, 'US Foods', '680193472561'),
+(75, '2025-04-11', FALSE, FALSE, 10, 'C&S Wholesale Grocers', '680193472561'),
 
-(100, '2025-04-15', TRUE, TRUE, 10, 'C&S Wholesale Grocers', '274918305672'),
-(75, '2025-04-15', TRUE, TRUE, 10, 'C&S Wholesale Grocers', '720394816205'),
+(100, '2025-04-15', FALSE, FALSE, 10, 'Sysco', '274918305672'),
+(75, '2025-04-15', TRUE, TRUE, 10, 'McLane Company', '720394816205'),
 
-(50, '2025-04-17', TRUE, FALSE, 11, 'McLane Company', '104758392674'),
-(50, '2025-04-17', TRUE, TRUE, 11, 'McLane Company', '204839176502'),
-(50, '2025-04-17', TRUE, TRUE, 11, 'McLane Company', '963184275091'),
+(50, '2025-04-17', FALSE, FALSE, 11, 'KeHE Distributors', '104758392674'),
+(50, '2025-04-17', TRUE, TRUE, 11, 'US Foods', '204839176502'),
+(50, '2025-04-17', TRUE, TRUE, 11, 'US Foods', '963184275091'),
 
-(75, '2025-04-14', TRUE, FALSE, 11, 'US Foods', '182640593827'),
-(50, '2025-04-14', TRUE, TRUE, 11, 'US Foods', '823647195038'),
+(75, '2025-04-14', FALSE, FALSE, 11, 'US Foods', '182640593827'),
+(50, '2025-04-14', TRUE, TRUE, 11, 'McLane Company', '823647195038'),
 
-(75, '2025-04-15', TRUE, TRUE, 12, 'Sysco', '963184275091'),
+(75, '2025-04-15', FALSE, FALSE, 12, 'US Foods', '963184275091'),
 (100, '2025-04-15', TRUE, TRUE, 12, 'Sysco', '690583142709'),
 
-(40, '2025-04-10', TRUE, TRUE, 12, 'C&S Wholesale Grocers', '839205764319'),
+(40, '2025-04-10', FALSE, FALSE, 12, 'Sysco', '839205764319'),
 (40, '2025-04-10', TRUE, TRUE, 12, 'C&S Wholesale Grocers', '509274836120'),
-(20, '2025-04-10', TRUE, FALSE, 12, 'C&S Wholesale Grocers', '823647195038');
+(20, '2025-04-10', FALSE, FALSE, 12, 'McLane Company', '823647195038');
 
 INSERT INTO reorders_in_shipments (reorder_id, shipment_id) VALUES
 (1, 1),
