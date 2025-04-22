@@ -35,16 +35,11 @@ def reorder(store_id: int) -> None:
     """
 
     try:
-
-        # Joel's local server.
-        conn, cursor = connect_to_bmart_db(
-            '127.0.0.1', 'root', 'MomIsTheBest1966!', 'final_proj_test')
-
-        '''
+        
         # Helper function from connection file with a connection to our database.
         conn, cursor = connect_to_bmart_db(
             'cs314.iwu.edu', 'gjkt', 'H*aNjFho9q', 'gjkt')
-        '''
+        
         try:
 
             # List to store all of the store IDs in the db, to check if the parameter is valid.
