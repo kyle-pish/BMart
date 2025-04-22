@@ -99,7 +99,9 @@ def reorder(store_id: int) -> None:
                         derived_prod_amt = prod_stocking["max_inventory"] - \
                             prod_stocking["current_inventory"]
 
-                        # Add that as the value to its UPC
+                        # Add that as the value to its UPC, add the vendor name, and add the standard price.
+                        # And no, im not the genius that came up with how to nicely convert MySQL decimal to Python numbers.
+                        # https://python-forum.io/thread-31068.html
                         products_to_be_ordered[prod_stocking["product_UPC"]] = [
                             derived_prod_amt, prod_stocking["vendor_name"], float(prod_stocking["standard_price"])]
 
