@@ -41,7 +41,7 @@ def reorder(store_id: int) -> None:
             'cs314.iwu.edu', 'gjkt', 'H*aNjFho9q', 'gjkt')
 
         # Break out of the program if we can't connect.
-        if not cursor:
+        if not cursor or not conn:
             print("Could not make a connection to the database.")
             return
 
@@ -101,7 +101,7 @@ def reorder(store_id: int) -> None:
 
                         # Add that as the value to its UPC
                         products_to_be_ordered[prod_stocking["product_UPC"]] = [
-                            derived_prod_amt, prod_stocking["vendor_name"], int(prod_stocking["standard_price"])]
+                            derived_prod_amt, prod_stocking["vendor_name"], float(prod_stocking["standard_price"])]
 
                     # Otherwise, its full, so don't add it to the dict, or don't consider it
                     # This isn't a product that needs its reorder updated NOR needs a reorder created at the moment.
@@ -166,17 +166,20 @@ def reorder(store_id: int) -> None:
                                 f'Unconfirmed reorder for product {upc} was updated to have {quantity[0]} items!')
 
                             # This is for finding products/vendor, check if we've seen the vendor before,
-                            # if we haven't add it to the dict with its value being the length of the value list // 2 to act as the occurance count, since its a list of 2 indeces.
+                            # if we haven't add it to the dict with its value being occurance count, then
+                            # we add multiply the price of the product by its quantity and add that to the total cost
+                            # variable anytime a reorder gets updated or created.
                             if quantity[1] not in products_updated_per_vend:
-                                products_updated_per_vend[quantity[1]] = len(
-                                    quantity) // 2
+                                products_updated_per_vend[quantity[1]] = 1
                                 total_cost += quantity[0] * quantity[2]
 
                             # If we have found it, add the occurance back into the dict.
                             else:
-                                products_updated_per_vend[quantity[1]
-                                                          ] += len(quantity) // 2
+                                products_updated_per_vend[quantity[1]] += 1
                                 total_cost += quantity[0] * quantity[2]
+
+                    else:
+                        print("No reorders were updated.")
 
                     print()
 
@@ -187,14 +190,15 @@ def reorder(store_id: int) -> None:
                             print(
                                 f'Reorder for product {upc} was successfully created with {quantity[0]} items!')
                             if quantity[1] not in products_made_per_vend:
-                                products_made_per_vend[quantity[1]] = len(
-                                    quantity) // 2
+                                products_made_per_vend[quantity[1]] = 1
                                 total_cost += quantity[0] * quantity[2]
 
                             else:
-                                products_made_per_vend[quantity[1]
-                                                       ] += len(quantity) // 2
+                                products_made_per_vend[quantity[1]] += 1
                                 total_cost += quantity[0] * quantity[2]
+
+                    else:
+                        print("No reorders were created.")
 
                     print()
 
@@ -204,8 +208,6 @@ def reorder(store_id: int) -> None:
                         for vendor, reorder_count in products_updated_per_vend.items():
                             print(
                                 f'For vendor {vendor}, there were {reorder_count} reorder(s) updated.')
-                    else:
-                        print("No unconfirmed reorders were updated.")
 
                     print()
 
@@ -215,14 +217,12 @@ def reorder(store_id: int) -> None:
                         for vendor, reorder_count in products_made_per_vend.items():
                             print(
                                 f'For vendor {vendor}, there were {reorder_count} reorder(s) created.')
-                    else:
-                        print("No new reorders were created.")
 
                     print()
 
                     # Just printing total cost of all reorders whether they're updates or new ones.
                     print(
-                        f'The total cost of all reorders in store {store_id}, was ${total_cost}.')
+                        f'The total cost of all reorders in store {store_id} was ${total_cost}.')
 
                     print()
 
