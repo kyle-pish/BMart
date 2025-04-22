@@ -39,6 +39,11 @@ def reorder(store_id: int) -> None:
         # Helper function from connection file with a connection to our database.
         conn, cursor = connect_to_bmart_db(
             'cs314.iwu.edu', 'gjkt', 'H*aNjFho9q', 'gjkt')
+
+        # Break out of the program if we can't connect.
+        if not cursor:
+            print("Could not make a connection to the database.")
+            return
         
         try:
 
