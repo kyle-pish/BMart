@@ -35,7 +35,7 @@ def reorder(store_id: int) -> None:
     """
 
     try:
-        
+
         # Helper function from connection file with a connection to our database.
         conn, cursor = connect_to_bmart_db(
             'cs314.iwu.edu', 'gjkt', 'H*aNjFho9q', 'gjkt')
@@ -44,7 +44,7 @@ def reorder(store_id: int) -> None:
         if not cursor:
             print("Could not make a connection to the database.")
             return
-        
+
         try:
 
             # List to store all of the store IDs in the db, to check if the parameter is valid.
@@ -278,4 +278,4 @@ if __name__ == '__main__':
     reorder('0')
     reorder('4')
     reorder("11")
-    reorder("Im hacksoring you...")
+    reorder("Im haxoring you...")
