@@ -108,7 +108,11 @@ CREATE TABLE inventory (
     store_id INT,
     PRIMARY KEY (product_UPC, store_id), -- Create a primary key using foreign keys to get the inventory of a specific product for a specific store
     FOREIGN KEY (product_UPC) REFERENCES products(product_UPC),
-    FOREIGN KEY (store_id) REFERENCES stores(store_id)
+    FOREIGN KEY (store_id) REFERENCES stores(store_id),
+    
+    CONSTRAINT chk_inventory_size_within_max CHECK (
+		current_inventory <= max_inventory -- Make sure we don't allow there to be a case where we hold more than we can for a product.
+    )
 );
 
 -- Table: shipments
@@ -134,7 +138,7 @@ CREATE TABLE shipments (
 -- Table: reorder_requests
 CREATE TABLE reorder_requests (
     reorder_id INT PRIMARY KEY AUTO_INCREMENT,
-    quantity_of_product TINYINT NOT NULL,
+    quantity_of_product TINYINT UNSIGNED NULL,
     order_date DATETIME NOT NULL,
     confirmed BOOLEAN NOT NULL, -- track if a vendor has confirmed they have seen the order
     completed BOOLEAN NOT NULL, -- check if a reorder is still in progress or has been completed
