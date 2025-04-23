@@ -28,9 +28,9 @@ def stock(store_id: int, shipment_id : int, shipment_items : dict[str, int] ):
     """
 
     # Deepu's local/root server.
-    #conn, cursor = connect_to_bmart_db('127.0.0.1', 'root', 'DocDeeps!', 'cs314_project')
+    conn, cursor = connect_to_bmart_db('127.0.0.1', 'root', 'DocDeeps!', 'cs314_project')
 
-    conn, cursor = connect_to_bmart_db('cs314.iwu.edu', 'gjkt', 'H*aNjFho9q', 'gjkt') #iwu database server
+    #conn, cursor = connect_to_bmart_db('cs314.iwu.edu', 'gjkt', 'H*aNjFho9q', 'gjkt') #iwu database server
 
     #Raise error if connection is unsuccessful
     if conn is None or not conn.is_connected():
@@ -204,22 +204,40 @@ def stock(store_id: int, shipment_id : int, shipment_items : dict[str, int] ):
 
         #Print Output
         
-        cursor.execute("SELECT shipments.received_delivery FROM shipments WHERE shipments.shipment_id = %s", (shipment_id,))
-        shipment_date = cursor.fetchone()
+        cursor.execute("SELECT shipments.received_delivery, shipments.expected_delivery, shipments.vendor_name FROM shipments WHERE shipments.shipment_id = %s", (shipment_id,))
+        shipment_data = cursor.fetchone()
 
-        print(f"Shipment Delivery Date:\t{shipment_date['received_delivery']}")
+        print(f"Shipment Delivery Date:\t{shipment_data['received_delivery']}")
+        print(f"Expected Delivery Date:\t{shipment_data['expected_delivery']}\n")
+        print(f"Vendor:\t{shipment_data['vendor_name']}\n")
+
+        #Find product name given product UPC
+        cursor.execute("SELECT products.product_UPC, products.product_name FROM products")
+
+        product_names = {}
+
+        product_data = cursor.fetchall()
         
+        for record in product_data:
+            product_data = []
+            for key in record.keys():
+                product_data.append(record[key])
+            product_names[product_data[0]] = product_data[1]
+             
         print("Expected Product Counts:")
         for key in expected_items.keys():
-            print(f"{key}:\t{expected_items[key]}")
+            print(f"{key} - {product_names[key]}:\t{expected_items[key]}")
         print()
         print("Actual Product Counts:")
         for key in stocked_items.keys():
-            print(f"{key}:\t{stocked_items[key]}")
+            print(f"{key} - {product_names[key]}:\t{stocked_items[key]}")
         print()
         print("Item Discrepancies:")
-        for key in item_discrepancies.keys():
-            print(f"{key}:\t{item_discrepancies[key]}")
+        if len(item_discrepancies) == 0:
+            print("None")
+        else:
+            for key in item_discrepancies.keys():
+                print(f"{key} - {product_names[key]}:\t{item_discrepancies[key]}")
         
         print(40*"-")
         print()
@@ -244,5 +262,5 @@ if __name__ == "__main__":
     stock(1,2,{'710492385612': 50, '680193472561': 50})
 
     #Raises Value Error that store is invalid
-    stock(14,25, {'nothing':2})
+    #stock(14,25, {'nothing':2})
   
