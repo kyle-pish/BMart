@@ -2,11 +2,15 @@
 BMart Stock Function (2.1)
 CS314 Spring 2025
 Gnandeep Chintala
+
+04/23/2025
 '''
 
 from bmart_connection import connect_to_bmart_db
 from mysql.connector import Error
 
+
+#Based on Joel's Code in the reorder function
 
 def stock(store_id: int, shipment_id : int, shipment_items : dict[str, int] ):
 
@@ -98,7 +102,8 @@ def stock(store_id: int, shipment_id : int, shipment_items : dict[str, int] ):
         #print(shipment_items)
 
         #Create a dictionary of discrepancies between reorder and shipment
-        item_discrepencies = {}
+        item_discrepancies = {}
+        expected_items = {}
 
         for record in items_in_reorders:
             #if product_ordered - how much shipped != 0:
@@ -107,15 +112,17 @@ def stock(store_id: int, shipment_id : int, shipment_items : dict[str, int] ):
                 print("The reorder has already been processed and completed!")
                 #return
             product_UPC = str(record['product_ordered'])
-            item_discrepancy = record['quantity_of_product'] - shipment_items[product_UPC]
+            expected_product_count = record['quantity_of_product']
+            expected_items[product_UPC] = expected_product_count
+            item_discrepancy = expected_product_count - shipment_items[product_UPC]
             if expected_shipment_count['expected_num_items'] != shipment_size:
                 if item_discrepancy != 0:
-                    item_discrepencies[product_UPC] = item_discrepancy
+                    item_discrepancies[product_UPC] = item_discrepancy
                     #return
                 #return
             
         
-        print(item_discrepencies)
+        print(item_discrepancies)
 
         
         #Check that shipment size  = expected shipment count
@@ -157,15 +164,35 @@ def stock(store_id: int, shipment_id : int, shipment_items : dict[str, int] ):
                 SET reorder_requests.completed = TRUE
                 WHERE reorders_in_shipments.shipment_id = %s;"""
         ), (shipment_id,))
+        
+        conn.commit()
 
         #Print Output
+        #NEed to FINISH!!!!!!!!!!!!
+        # Print Output
+        # conn.rollbacks at errors above
+        #Edit DB for testing code (5 pass and 5 supposed fail)
+
         print("Shipment Details")
+        print(40*"-")      
 
-        cursor.execute("SELECT shipments.recieved_delivery FROM shipments WHERE shipments.shipment_id = %s", (shipment_id,))
+        cursor.execute("SELECT shipments.received_delivery FROM shipments WHERE shipments.shipment_id = %s", (shipment_id,))
+        shipment_date = cursor.fetchone()
+
+        print(f"Shipment Delivery Date:\t{shipment_date['received_delivery']}")
         
-        print("Shipment Delivery Date:")
+        print("Expected Product Counts:")
+        for key in expected_items.keys():
+            print(f"{key}:\t{expected_items[key]}")
+        print()
+        print("Actual Product Counts:")
+        for key in stocked_items.keys():
+            print(f"{key}:\t{stocked_items[key]}")
+        print()
+        print("Item Discrepancies:")
+        for key in item_discrepancies.keys():
+            print(f"{key}:\t{item_discrepancies[key]}")
 
-        conn.commit()
 
     except ValueError as value_error:
         print(f"Value Error: {value_error}")
@@ -180,7 +207,5 @@ def stock(store_id: int, shipment_id : int, shipment_items : dict[str, int] ):
         conn.close()
 
 if __name__ == "__main__":
-    stock(0,0,{})
-    #stock(1,1,{"823647195038": 101, "810237465920": 100})
-    #stock(1,25,{'abc':25})
-    #stock(14,2,{"abc": 1})
+    stock(1,2,{'710492385612': 48, '680193472561': 50})
+  
