@@ -15,9 +15,9 @@ def reorder(store_id: int) -> None:
 
     This does so by first checking that the store id entered to run this code is valid and is a store that exists in BMART.
 
-    Then, before any reorders are considered or made, we check that stores inventory and determine the remaining product count
-    for each product in the inventory at that moment. From here, we look at that stores reorder requests, and for the ones
-    that are in progress(unconfirmed with the vendor), we replace the quantity of that reorder with the corresponding product count
+    Then, before any reorders are considered or made, we check that stores inventory, ensure that we got an inventory, and it has something in it,
+    and determine the remaining product count for each product in the inventory at that moment. From here, we look at that stores reorder requests, 
+    and for the ones that are in progress(unconfirmed with the vendor), we replace the quantity of that reorder with the corresponding product count
     derived from the inventory. After reorder updates are considered/complete (after considering unconfirmed reorder requests), we create new reorders to
     fill the inventory of all products sold by a store to the max.
 
