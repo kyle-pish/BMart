@@ -42,7 +42,8 @@ def reorder(store_id: int) -> None:
 
         # Break out of the program if we can't connect.
         if not cursor or not conn:
-            print("Could not make a connection to the database.")
+            print(
+                "Could not make a connection to the database. Please reconfirm connection credentials...")
             return
 
         try:
@@ -91,25 +92,37 @@ def reorder(store_id: int) -> None:
                 cursor.execute(
                     prod_query, (store_id,))
 
-                for prod_stocking in cursor:
+                inventory_products = cursor.fetchall()
 
-                    # If the product amount isnt full...
-                    if prod_stocking["current_inventory"] < prod_stocking["max_inventory"]:
+                # Check that we successfully got the stores inventory...
+                if len(inventory_products) > 0:
 
-                        # Calculate how much left is needed for the product to be stocked.
-                        derived_prod_amt = prod_stocking["max_inventory"] - \
-                            prod_stocking["current_inventory"]
+                    for prod_stocking in inventory_products:
 
-                        # Add that as the value to its UPC, add the vendor name, add the standard pricen and add the name of the product.
-                        # And no, im not the genius that came up with how to nicely convert MySQL decimal to Python numbers.
-                        # https://python-forum.io/thread-31068.html
-                        products_to_be_ordered[prod_stocking["product_UPC"]] = [
-                            derived_prod_amt, prod_stocking["vendor_name"], float(prod_stocking["standard_price"]), prod_stocking["product_name"]]
+                        # If the product amount isnt full...
+                        if prod_stocking["current_inventory"] < prod_stocking["max_inventory"]:
 
-                    # Otherwise, its full, so don't add it to the dict, or don't consider it
-                    # This isn't a product that needs its reorder updated NOR needs a reorder created at the moment.
-                    else:
-                        continue
+                            # Calculate how much left is needed for the product to be stocked.
+                            derived_prod_amt = prod_stocking["max_inventory"] - \
+                                prod_stocking["current_inventory"]
+
+                            # Add that as the value to its UPC, add the vendor name, add the standard pricen and add the name of the product.
+                            # And no, im not the genius that came up with how to nicely convert MySQL decimal to Python numbers.
+                            # https://python-forum.io/thread-31068.html
+                            products_to_be_ordered[prod_stocking["product_UPC"]] = [
+                                derived_prod_amt, prod_stocking["vendor_name"], float(prod_stocking["standard_price"]), prod_stocking["product_name"]]
+
+                        # Otherwise, its full, so don't add it to the dict, or don't consider it
+                        # This isn't a product that needs its reorder updated NOR needs a reorder created at the moment.
+                        else:
+                            continue
+
+                # Rollback and throw error if we didn't.
+                else:
+                    conn.rollback()
+                    print(
+                        f'Error fetching inventory for store {store_id}. Unable to proceed and make reorders.')
+                    return
 
                 # Here, check the in progress reorders from given store.
                 update_or_insert_check = ("SELECT * FROM reorder_requests "
@@ -230,7 +243,7 @@ def reorder(store_id: int) -> None:
                     print()
 
                     print(
-                        "====== Your reorders have been successfully updated/created to full your current inventory, thank you! ======")
+                        "====== Your reorders have been successfully updated/created to fill your current inventory, thank you! ======")
 
                     print()
 
@@ -244,9 +257,14 @@ def reorder(store_id: int) -> None:
                 return
 
         # If there was an error doing any SQL work, rollback all work, and show to the console.
+        except ValueError as val_error:
+            conn.rollback()
+            print("This value error has occurred: ", val_error)
+            raise e
+
         except Error as e:
             conn.rollback()
-            print("This error has occured while executing the query(ies). ", e)
+            print("This SQL error has occured: ", e)
             raise e
 
     # After everything, close the connection and cursor safely.
@@ -281,4 +299,4 @@ if __name__ == '__main__':
     reorder('0')
     reorder('4')
     reorder("11")
-    reorder("Im haxoring you...")
+    reorder("Im haxoring Brian Mart... muahahahah")
