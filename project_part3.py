@@ -29,10 +29,10 @@ def stock(store_id: int, shipment_id : int, shipment_items : dict[str, int] ):
     # Create a connection to the database using the helper function
 
     # Deepu's local/root server.
-    conn, cursor = connect_to_bmart_db('127.0.0.1', 'root', 'DocDeeps!', 'cs314_project')
+    #conn, cursor = connect_to_bmart_db('127.0.0.1', 'root', 'DocDeeps!', 'cs314_project')
 
     # iwu database server
-    # conn, cursor = connect_to_bmart_db('cs314.iwu.edu', 'gjkt', 'H*aNjFho9q', 'gjkt') 
+    conn, cursor = connect_to_bmart_db('cs314.iwu.edu', 'gjkt', 'H*aNjFho9q', 'gjkt') 
 
     # Raise error if connection is unsuccessful
     if conn is None or not conn.is_connected():
