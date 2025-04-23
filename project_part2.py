@@ -8,7 +8,6 @@ import mysql.connector
 from mysql.connector import Error
 import datetime
 
-
 def vendor_shipment(store : int, delivery_date : str, reorders : list[int], shipment_items : dict[str,int], vendor_name : str) -> None:
     """
     Creates shipments to Bmart stores from the vendors. Also prints the shipment manifest,
@@ -31,6 +30,7 @@ def vendor_shipment(store : int, delivery_date : str, reorders : list[int], ship
     try:
         # Connected now starting transaction.
         conn.start_transaction()
+        committed = False
 
         # check if date is valid format
         try:
@@ -107,9 +107,12 @@ def vendor_shipment(store : int, delivery_date : str, reorders : list[int], ship
             cursor.execute("UPDATE reorder_requests SET confirmed = 1 WHERE reorder_id = %s",
                            (reorder,))
 
+        conn.commit()
+        committed = True
+
         # Print manifest
-        print(f"New Shipment Processed, Shipment_no: {new_ship_id}")
-        print("Shipment Manifest:")
+        print(f"New Shipment Processed: Shipment {new_ship_id}")
+        print(f"===== Shipment {new_ship_id} Manifest =====")
         # get item names
         for item in shipment_items:
             cursor.execute("SELECT product_name "
@@ -121,7 +124,7 @@ def vendor_shipment(store : int, delivery_date : str, reorders : list[int], ship
         print()
 
         # Print reorders forfilled by this shipment
-        print(f"Shipment {new_ship_id} forfills Reorder(s):")
+        print(f"Shipment {new_ship_id} fulfills Reorder(s):")
         print(reorders)
 
         # Print outstanding Count of Store
@@ -143,13 +146,14 @@ def vendor_shipment(store : int, delivery_date : str, reorders : list[int], ship
         bmart_outstanding = cursor.fetchone()
         print(f"Outstanding Reorders Requests to Bmart: {bmart_outstanding["count(reorder_requests.vendor_name)"]}")
         print()
-        conn.commit()
 
     # Whenever there is an error, print error and rollback
     except ValueError as valerr:
         print(f"Value Error: {valerr}")
         conn.rollback()
     except Error as err:
+        if committed:
+            print("Shipment was processed and commited to database, other error occurred:")
         print(f"Database Error: {err}")
         conn.rollback()
 
