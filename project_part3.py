@@ -8,8 +8,6 @@ from bmart_connection import connect_to_bmart_db
 from mysql.connector import Error
 
 
-#Based on Joel's Code in the reorder function
-
 def stock(store_id: int, shipment_id : int, shipment_items : dict[str, int] ):
 
     # Deepu's local server.
@@ -21,99 +19,153 @@ def stock(store_id: int, shipment_id : int, shipment_items : dict[str, int] ):
     
     try:
         conn.start_transaction()
+
+        #check if shipment exists in the DB
+
+        cursor.execute("""
+                        SELECT shipment_id, delivered FROM shipments
+                        WHERE shipment_id = %s
+                        """, (shipment_id,))
         
-        print(shipment_items)
+        shipment_valid = cursor.fetchone()
+        print(shipment_valid)
 
-        #Check if store id exists
-        cursor.execute("""SELECT COUNT(stores.store_id) FROM stores
-                            WHERE stores.store_id = %s""", (store_id,))
-        valid_stores = cursor.fetchone()
+        #print(shipment_valid)
+
+        if shipment_valid == None :
+            print("Invalid Shipment!")
+            #return
+        elif shipment_valid['delivered'] == 1:
+            print("Shipment already processed!")
+            #return
         
-        if valid_stores["COUNT(stores.store_id)"] == 0:
-            print( "Invalid Store ID")
-            return
-
-        #Check if shipment id exist
-        #Check that shipment delivered is False
-        cursor.execute("""SELECT shipments.shipment_id, shipments.delivered FROM shipments
-                        WHERE shipments.shipment_id = %s""", (shipment_id,))
+        #check if store exists in the DB
+        cursor.execute("""
+                        SELECT store_id FROM stores
+                        WHERE store_id = %s
+                    """, (store_id,))
         
-        cursor_result = cursor.fetchone()
-        print(cursor_result)
+        store_valid = cursor.fetchone()
 
+        #print(store_valid)
 
-        if cursor_result == None:
-            print("Invalid Shipment")
-            return
-        #elif cursor_result['delivered'] != False:
-        #    print("Shipment Already Delivered!")
-        #    return
+        if store_valid == None:
+            print("Invalid Store!")
+            #return
         
-        #Check that all the reorders of the shipment_items parameter exist in shipment_id(shipment_id parameter)
-        cursor.execute("""SELECT shipments.shipment_id, reorders_in_shipments.reorder_id, reorder_requests.product_ordered, stores.store_id FROM shipments 
-                            JOIN reorders_in_shipments ON shipments.shipment_id = reorders_in_shipments.shipment_id
-                            JOIN reorder_requests ON reorders_in_shipments.reorder_id = reorder_requests.reorder_id
-                            JOIN stores ON reorder_requests.store_id = stores.store_id
-                            WHERE stores.store_id = %s && shipments.shipment_id = %s""", (store_id, shipment_id))
+        #print(shipment_items)
 
-        valid_reorders_in_ship = cursor.fetchall()
+        #Check if shipment has valid reorders
+        cursor.execute(
+                        """
+                        SELECT reorders_in_shipments.reorder_id FROM shipments
+                        JOIN reorders_in_shipments ON shipments.shipment_id = reorders_in_shipments.shipment_id
+                        WHERE shipments.shipment_id = %s
+                        AND reorders_in_shipments.reorder_id IN (SELECT reorder_id FROM reorder_requests);
+                        """, (shipment_id,))
 
+        valid_reorders = cursor.fetchall()
 
-        for record in valid_reorders_in_ship:
+        if len(valid_reorders) != len(shipment_items):
+            print("Shipment contains unplaced reorders!")
+
+        #Checking item counts and shipment sizes
         
-            if record["product_ordered"] in shipment_items:
-                print("yes")
-            else:
-                print('bad')
-            
+        #Checking if shipment items are in reorders associated with the shipment
+        # So, same product_id and same item count
+        # Also check total product count
 
-         #Mark as delivered
-        cursor.execute("""UPDATE shipments
-                SET received_delivery = current_timestamp(), delivered = TRUE
-                WHERE shipment_id = %s""",
-                (shipment_id,))
-
-           
-        ##if shipment date later than expected date, print shipment delayed error -> Need to do
-
-
-        # Check shipment size by manually counting total items in the shipment
         shipment_size = 0
         for key in shipment_items.keys():
             shipment_size = shipment_items[key] + shipment_size
         
-        #Raise error if shipment size < total reorder request count
-         #if reorder size <  shipment size; raise error: improper shipment?
+        cursor.execute("SELECT shipments.expected_num_items FROM shipments WHERE shipments.shipment_id = %s", (shipment_id,))
 
+        expected_shipment_count = cursor.fetchone()
+        print(expected_shipment_count)
+
+
+        cursor.execute(
+                        """
+                        SELECT reorder_requests.product_ordered, reorder_requests.quantity_of_product, reorder_requests.completed FROM shipments
+                        JOIN reorders_in_shipments AS ros ON shipments.shipment_id = ros.shipment_id
+                        JOIN reorder_requests ON ros.reorder_id = reorder_requests.reorder_id
+                        WHERE shipments.shipment_id = %s
+                        """, (shipment_id,))
+        
+        items_in_reorders = cursor.fetchall()
+        #print(items_in_reorders)
+        #print(shipment_items)
+
+        #Create a dictionary of discrepancies between reorder and shipment
+        item_discrepencies = {}
+
+        for record in items_in_reorders:
+            #if product_ordered - how much shipped != 0:
+            #add to dictionary:  [product_ordered]: item discrepancy
+            if record['completed'] == 1:
+                print("The reorder has already been processed and completed!")
+                #return
+            product_UPC = str(record['product_ordered'])
+            item_discrepancy = record['quantity_of_product'] - shipment_items[product_UPC]
+            if expected_shipment_count['expected_num_items'] != shipment_size:
+                if item_discrepancy != 0:
+                    item_discrepencies[product_UPC] = item_discrepancy
+                    #return
+                #return
+            
+        
+        print(item_discrepencies)
+
+        
+        #Check that shipment size  = expected shipment count
+        #Then check that reorder item count = shipment item count
+        # 
+
+        #Updates shipments DB
+        # Sets the current timestamp, etc.
+        # Marks that delivered is true      
+        cursor.execute("""UPDATE shipments
+                SET received_delivery = current_timestamp(), delivered = TRUE
+                WHERE shipment_id = %s""",
+                (shipment_id,))
+        
+
+        #Update shipments table for number of total shipped items
         cursor.execute("""UPDATE shipments
                        SET num_shipped_items = %s
                        WHERE shipment_id = %s"""
                        , (shipment_size, shipment_id))
         
-        #Change data in the inventory table
-
-               #if new inventory size >  max inventory size, raise error: shipment too large
-        #Calculate how much larger and provide that in the exception
-
+        #Update Inventory Table
+        #Also create a dictionary of stocked items
+        stocked_items = {}
         for key in shipment_items.keys():
             cursor.execute("""UPDATE inventory
                     SET inventory.current_inventory = inventory.current_inventory + %s
                     WHERE inventory.product_UPC = %s
                     AND inventory.store_id = %s""",(shipment_items[key], key, store_id))
+            stocked_items[key] = shipment_items[key]
+        
 
         #Mark reorder request as completed after stocking;
         #Don't invoke if any of the previous steps fail
 
-        query = (
+        cursor.execute((
             """UPDATE reorder_requests JOIN reorders_in_shipments
                 ON reorder_requests.reorder_id = reorders_in_shipments.reorder_id
                 SET reorder_requests.completed = TRUE
                 WHERE reorders_in_shipments.shipment_id = %s;"""
-        )
+        ), (shipment_id,))
 
+        #Print Output
+        print("Shipment Details")
+
+        cursor.execute("SELECT shipments.recieved_delivery FROM shipments WHERE shipments.shipment_id = %s", (shipment_id,))
         
-        cursor.execute(query, (shipment_id,))
-        
+        print("Shipment Delivery Date:")
+
+        conn.commit()
 
     except ValueError as value_error:
         print(f"Value Error: {value_error}")
@@ -127,4 +179,8 @@ def stock(store_id: int, shipment_id : int, shipment_items : dict[str, int] ):
         cursor.close()
         conn.close()
 
-stock(2,3,{"659382047193": 75, "158372946021": 50})
+if __name__ == "__main__":
+    stock(0,0,{})
+    #stock(1,1,{"823647195038": 101, "810237465920": 100})
+    #stock(1,25,{'abc':25})
+    #stock(14,2,{"abc": 1})
