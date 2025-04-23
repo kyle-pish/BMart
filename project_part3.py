@@ -1,7 +1,4 @@
-import mysql.connector
-
 '''
-
 BMart Stock Function (2.1)
 CS314 Spring 2025
 Gnandeep Chintala
@@ -20,23 +17,64 @@ def stock(store_id: int, shipment_id : int, shipment_items : dict[str, int] ):
 
     #conn, cursor = connect_to_bmart_db('cs314.iwu.edu', 'gjkt', 'H*aNjFho9q', 'gjkt') #gjkt database server
     if conn is None or not conn.is_connected():
-        raise mysql.connector.Error("Unable to Connect")
+        raise Error("Unable to Connect")
     
     try:
         conn.start_transaction()
         
-        #Mark as delivered
-       
-       #Marks the date and time of shipment reciept.
-       #Also marks that the shipment has been delivered
-        cursor.execute(
-            "UPDATE shipments"
-                "SET received_delivery = current_timestamp(), delivered = TRUE,"
-                "WHERE shipment_id = %s"
-            , [shipment_id])
-        
-    #if shipment date later than expected date, print shipment delayed error -> Need to do
+        print(shipment_items)
 
+        #Check if store id exists
+        cursor.execute("""SELECT COUNT(stores.store_id) FROM stores
+                            WHERE stores.store_id = %s""", (store_id,))
+        valid_stores = cursor.fetchone()
+        
+        if valid_stores["COUNT(stores.store_id)"] == 0:
+            print( "Invalid Store ID")
+            return
+
+        #Check if shipment id exist
+        #Check that shipment delivered is False
+        cursor.execute("""SELECT shipments.shipment_id, shipments.delivered FROM shipments
+                        WHERE shipments.shipment_id = %s""", (shipment_id,))
+        
+        cursor_result = cursor.fetchone()
+        print(cursor_result)
+
+
+        if cursor_result == None:
+            print("Invalid Shipment")
+            return
+        #elif cursor_result['delivered'] != False:
+        #    print("Shipment Already Delivered!")
+        #    return
+        
+        #Check that all the reorders of the shipment_items parameter exist in shipment_id(shipment_id parameter)
+        cursor.execute("""SELECT shipments.shipment_id, reorders_in_shipments.reorder_id, reorder_requests.product_ordered, stores.store_id FROM shipments 
+                            JOIN reorders_in_shipments ON shipments.shipment_id = reorders_in_shipments.shipment_id
+                            JOIN reorder_requests ON reorders_in_shipments.reorder_id = reorder_requests.reorder_id
+                            JOIN stores ON reorder_requests.store_id = stores.store_id
+                            WHERE stores.store_id = %s && shipments.shipment_id = %s""", (store_id, shipment_id))
+
+        valid_reorders_in_ship = cursor.fetchall()
+
+
+        for record in valid_reorders_in_ship:
+        
+            if record["product_ordered"] in shipment_items:
+                print("yes")
+            else:
+                print('bad')
+            
+
+         #Mark as delivered
+        cursor.execute("""UPDATE shipments
+                SET received_delivery = current_timestamp(), delivered = TRUE
+                WHERE shipment_id = %s""",
+                (shipment_id,))
+
+           
+        ##if shipment date later than expected date, print shipment delayed error -> Need to do
 
 
         # Check shipment size by manually counting total items in the shipment
@@ -47,42 +85,35 @@ def stock(store_id: int, shipment_id : int, shipment_items : dict[str, int] ):
         #Raise error if shipment size < total reorder request count
          #if reorder size <  shipment size; raise error: improper shipment?
 
-        query = (
-            "UPDATE shipments"
-                "SET num_shipped_items = %s"
-                "WHERE shipment_id = %s"
-        )
-
-        cursor.execute(query,[shipment_size, shipment_id])
-
- 
+        cursor.execute("""UPDATE shipments
+                       SET num_shipped_items = %s
+                       WHERE shipment_id = %s"""
+                       , (shipment_size, shipment_id))
         
         #Change data in the inventory table
-        for key in shipment_items.keys():
-            query = (
-                "UPDATE inventory"
-                    "SET inventory.current_inventory = inventory.current_inventory + %s"
-                    "WHERE inventor.product_UPC = %s"
-                    "AND inventor.store_id = %s"
-            )
 
                #if new inventory size >  max inventory size, raise error: shipment too large
         #Calculate how much larger and provide that in the exception
 
-            cursor.execute(query,[shipment_items[key], key, store_id])
+        for key in shipment_items.keys():
+            cursor.execute("""UPDATE inventory
+                    SET inventory.current_inventory = inventory.current_inventory + %s
+                    WHERE inventory.product_UPC = %s
+                    AND inventory.store_id = %s""",(shipment_items[key], key, store_id))
 
         #Mark reorder request as completed after stocking;
         #Don't invoke if any of the previous steps fail
 
         query = (
-            "UPDATE reorder_requests JOIN reorders_in_shipments"
-                "ON reorder_requests.reorder_id = reorders_in_shipments.reorder_id"
-                "SET reorder_requests.completed = TRUE"
-                "WHERE reorders_in_shipments.shipment_id = %s;"
+            """UPDATE reorder_requests JOIN reorders_in_shipments
+                ON reorder_requests.reorder_id = reorders_in_shipments.reorder_id
+                SET reorder_requests.completed = TRUE
+                WHERE reorders_in_shipments.shipment_id = %s;"""
         )
 
         
-        cursor.execute(query, [shipment_id])
+        cursor.execute(query, (shipment_id,))
+        
 
     except ValueError as value_error:
         print(f"Value Error: {value_error}")
@@ -96,99 +127,4 @@ def stock(store_id: int, shipment_id : int, shipment_items : dict[str, int] ):
         cursor.close()
         conn.close()
 
-
-
-
-
-#Garbagio
-
-
-        # "UPDATE inventory"
-                #     "SET current_inventory = current_inventory + 'number of new items' "
-                    # UPDATE reorder request (complete)
-
-    """
-    uses stock(<store>, <shipment>, <shipment_items>).
-    - when shipment arrives (overnight)
-        Stockers unload shipment and move into store
-            redo the inventory tables
-    #- Note that shipment arrived (bool)
-    #- Note when shipment arrived (date-time)
-    - Count of number of items arriving (updates inventory)
-        - update store inventory to be updated at opening the next day
-        - updated DB
-    - if errors occur in the process of executing the stock funding,
-        everything should roll back and an error message will be printed
-        - ex. "Invalid shipment item ______ !"
-    - If no errors occur, then the SQL operations should be commited to the DB and
-        print stocker information
-        - details about the shipment that was just received
-        - list of shipment items and quantities stocked
-            - how many were stocked in comaprison to how many were sent
-        - A list of any inventory discrepancies between the shipment and promised by the vendor
-        and the shipment received by the store
-
-        - specify how <store>, <shipment>, <shipment_items> are to be passed into the function
-
-        - <store> and shipment shoudl presumably align with how your database identifies stores and shipments
-        - <shipment_items>, specify info via a parameter; either a string that follows some precise formatting or 
-            a dictionary mapping items to the quantity for each item in that shipment
-        
-        
-        - descirbe everything in docstrings for the functions
-        - document design decision as well as how the funciton accomplishes the steps required.
-    """
-                
-
-
-
-
-
-
-
-
-
-                
-            # Joel's code
-    """
-                products_to_be_ordered = {}
-
-                prod_query = (
-                    "SELECT inventory.product_UPC, inventory.current_inventory, inventory.max_inventory FROM inventory JOIN stores ON "
-                    "inventory.store_id = stores.store_id WHERE "
-                    "stores.store_id = %s;")
-
-                cursor.execute(
-                    prod_query, (store_id,))
-
-                for prod_stocking in cursor:
-                    if prod_stocking["current_inventory"] <= prod_stocking["max_inventory"]:
-                        derived_prod = prod_stocking["max_inventory"] - \
-                            prod_stocking["current_inventory"]
-                        products_to_be_ordered[prod_stocking["product_UPC"]
-                                            ] = derived_prod
-
-                check_ord_ship_query = ("SELECT inventory.product_UPC FROM inventory "
-                                        "JOIN stores ON inventory.store_id = stores.store_id "
-                                        "JOIN reorder_requests ON stores.store_id = reorder_requests.store_id "
-                                        "JOIN shipments ON stores.store_id = shipments.store_id "
-                                        "WHERE shipments.delivered != TRUE || reorder_requests.completed != TRUE "
-                                        "GROUP BY stores.store_id HAVING stores.store_id = %s;")
-
-                cursor.execute(check_ord_ship_query, (store_id,))
-                data = cursor.fetchall()
-                """
-    #        except Error as e:
-    #            print("This error has occured while executing the query(ies): ", e)
-    #            raise e
-
-    #    finally:
-    #        cursor.close()
-    #        conn.close()
-
- #query = (
-        #    "UPDATE shipments"
-        #        "SET received_delivery = current_timestamp(), delivered = TRUE,"
-        #        "WHERE shipment_id = %s"
-        #)
-
+stock(2,3,{"659382047193": 75, "158372946021": 50})

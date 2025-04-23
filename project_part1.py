@@ -60,6 +60,7 @@ def reorder(store_id: int) -> None:
             final_reorders_updated = {}
             final_reorders_made = {}
 
+            # Total price of all reorders made for a store.
             total_cost = 0
 
             # Helper dictionaries to store the vendor (key) as well as how many reorders (value) for printing later.
@@ -82,7 +83,7 @@ def reorder(store_id: int) -> None:
 
                 # SELECT to grab needed info from the inventory table for a store to derive how many products remain until that product it filled, and its vendor.
                 prod_query = (
-                    "SELECT inventory.product_UPC, inventory.current_inventory, inventory.max_inventory, products.vendor_name, products.standard_price FROM inventory "
+                    "SELECT inventory.product_UPC, inventory.current_inventory, inventory.max_inventory, products.vendor_name, products.standard_price, products.product_name FROM inventory "
                     "JOIN products ON inventory.product_UPC = products.product_UPC "
                     "JOIN stores ON inventory.store_id = stores.store_id "
                     "WHERE stores.store_id = %s;")
@@ -99,11 +100,11 @@ def reorder(store_id: int) -> None:
                         derived_prod_amt = prod_stocking["max_inventory"] - \
                             prod_stocking["current_inventory"]
 
-                        # Add that as the value to its UPC, add the vendor name, and add the standard price.
+                        # Add that as the value to its UPC, add the vendor name, add the standard pricen and add the name of the product.
                         # And no, im not the genius that came up with how to nicely convert MySQL decimal to Python numbers.
                         # https://python-forum.io/thread-31068.html
                         products_to_be_ordered[prod_stocking["product_UPC"]] = [
-                            derived_prod_amt, prod_stocking["vendor_name"], float(prod_stocking["standard_price"])]
+                            derived_prod_amt, prod_stocking["vendor_name"], float(prod_stocking["standard_price"]), prod_stocking["product_name"]]
 
                     # Otherwise, its full, so don't add it to the dict, or don't consider it
                     # This isn't a product that needs its reorder updated NOR needs a reorder created at the moment.
@@ -165,7 +166,7 @@ def reorder(store_id: int) -> None:
                         print("Updated reorders: ")
                         for upc, quantity in final_reorders_updated.items():
                             print(
-                                f'Unconfirmed reorder for product {upc} was updated to have {quantity[0]} items!')
+                                f'Unconfirmed reorder for product ({upc} - {quantity[3]}) was updated to have {quantity[0]} items!')
 
                             # This is for finding products/vendor, check if we've seen the vendor before,
                             # if we haven't add it to the dict with its value being occurance count, then
@@ -190,7 +191,7 @@ def reorder(store_id: int) -> None:
                         print("New reorders: ")
                         for upc, quantity in final_reorders_made.items():
                             print(
-                                f'Reorder for product {upc} was successfully created with {quantity[0]} items!')
+                                f'Reorder for product ({upc} - {quantity[3]}) was successfully created with {quantity[0]} items!')
                             if quantity[1] not in products_made_per_vend:
                                 products_made_per_vend[quantity[1]] = 1
                                 total_cost += quantity[0] * quantity[2]
