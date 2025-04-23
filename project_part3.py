@@ -125,6 +125,7 @@ def stock(store_id: int, shipment_id : int, shipment_items : dict[str, int] ):
         cursor.execute("SELECT products.product_UPC, products.product_name FROM products")
 
         # Dictionary to hold the names of the product with key as the product UPC and the value as the product name
+        # This will have product_UPC : product_names
         product_names = {}
 
         product_data = cursor.fetchall()
@@ -176,10 +177,12 @@ def stock(store_id: int, shipment_id : int, shipment_items : dict[str, int] ):
 
 
         # Create a dictionary of discrepancies between reorder and shipment
+        # This will be of format product_UPC : item count
         item_discrepancies = {}
 
         # Create a dictionary of expected items in the shipment
         # This will be similar to the shipment_items parameter, but it is built from the DB
+        # This will be of format product_UPC : item_count
         expected_items = {}
 
         # Populate the above dictionaries
@@ -228,6 +231,7 @@ def stock(store_id: int, shipment_id : int, shipment_items : dict[str, int] ):
                        , (shipment_size, shipment_id))
         
         # Create a dictionary of stocked items for items that have been entered into the inventory
+        # This will be of format product_UPC : item_count
         stocked_items = {}
 
         # This Query updates the inventory table with all items that arrived in the shipment based on the shipment items count,
