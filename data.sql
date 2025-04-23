@@ -264,7 +264,7 @@ INSERT INTO inventory (product_price, max_inventory, current_inventory, product_
 (5.50, 175, 66, '839205764319', 1),
 (8.25, 150, 75, '274918305672', 1),
 (6.75, 125, 81, '963184275091', 1),
-(6.50, 150, 119, '710492385612', 1),
+(6.50, 150, 100, '710492385612', 1),
 (6.50, 150, 66, '204839176502', 1),
 (12.50, 75, 75, '659382047193', 1),
 (10.50, 150, 93, '182640593827', 1),
@@ -557,7 +557,7 @@ INSERT INTO inventory (product_price, max_inventory, current_inventory, product_
 -- Insert Shipments
 INSERT INTO shipments (expected_delivery, received_delivery, expected_num_items, num_shipped_items, delivered, store_id, vendor_name) VALUES
 ('2025-04-20', '2025-04-21', 200, 200, TRUE, 1, 'C&S Wholesale Grocers'),
-('2025-04-12', NULL, 100, NULL, FALSE, 1, 'KeHE Distributors'),
+('2025-04-28', NULL, 100, NULL, FALSE, 1, 'KeHE Distributors'),
 
 ('2025-04-18', '2025-04-20', 175, 175, TRUE, 2, 'C&S Wholesale Grocers'),
 ('2025-04-16', '2025-04-16', 150, 150, TRUE, 2, 'McLane Company'),
