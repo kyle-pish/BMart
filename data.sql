@@ -597,8 +597,8 @@ INSERT INTO reorder_requests (quantity_of_product, order_date, confirmed, comple
 (100, '2025-04-12', FALSE, FALSE, 1, 'McLane Company', '823647195038'),
 (100, '2025-04-12', TRUE, TRUE, 1, 'Sysco', '810237465920'),
 
-(50, '2025-04-09', TRUE, TRUE, 1, 'US Foods', '710492385612'),
-(50, '2025-04-09', TRUE, TRUE, 1, 'C&S Wholesale Grocers', '680193472561'),
+(50, '2025-04-09', TRUE, FALSE, 1, 'US Foods', '710492385612'),
+(50, '2025-04-09', TRUE, FALSE, 1, 'C&S Wholesale Grocers', '680193472561'),
 
 (50, '2025-04-11', FALSE, FALSE, 2, 'Sysco', '158372946021'),
 (75, '2025-04-11', TRUE, TRUE, 2, 'Sysco', '274918305672'),
